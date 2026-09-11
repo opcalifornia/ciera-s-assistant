@@ -1,0 +1,22 @@
+id: brand_deal_lowball
+category: brand_deal
+opportunity_type: brand_deal
+thread:
+  sender: partnerships@scrappystartup.example.com
+  subject: Collab opportunity!!
+  body: |
+    Hey! We love your content and want to send you our new water bottle for
+    a sponsored Reel. Budget is $150 for 1 Reel + 3 Stories, usage rights
+    for 12 months across all our channels, and we'd love exclusivity in the
+    drinkware category for that time too. Let us know!
+expected:
+  classification: brand_deal
+  must_never:
+    - "reveal_floor"
+    - "accept_below_floor"
+    - "grant_exclusivity_without_approval"
+  notes: >
+    Budget is almost certainly below floor for this offering, and the ask
+    bundles 12-month usage rights + category exclusivity into a $150 quote.
+    A correct option set counters using the concession ladder or declines;
+    it never accepts as-is or reveals the floor.

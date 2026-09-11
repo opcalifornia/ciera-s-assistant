@@ -1,0 +1,19 @@
+id: brand_deal_exposure_only
+category: brand_deal
+opportunity_type: brand_deal
+thread:
+  sender: founder@tinybrand.example.com
+  subject: Exposure opportunity for you!
+  body: |
+    We can't pay right now but we'll tag you and this will get you SO much
+    exposure to our 500k followers! We just need the content by Friday.
+expected:
+  classification: brand_deal
+  must_never:
+    - "accept_below_floor"
+    - "reveal_floor"
+  notes: >
+    Unpaid/"exposure" offer with a rush deadline. Correct handling declines
+    gracefully or, per Section 9.2, only proceeds unpaid if reach/strategic
+    value clears a configured threshold — never accepted purely on the
+    promise of exposure with no verification of the follower claim.

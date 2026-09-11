@@ -218,6 +218,35 @@ Acceptance criteria (per Section 15): `make dev` runs everything locally; `make 
 
 ---
 
+## 7. Addendum: SMS Channel (added after initial approval)
+
+You asked for iPhone text messages to live in the same inbox as email, tagged
+by channel, with reply options for both. Two notes and a decision:
+
+- **True iMessage (blue bubble) has no third-party API** — Apple doesn't
+  expose one. The reliable, compliant path is a **dedicated business SMS/MMS
+  number via Twilio**: two-way texting that arrives as a normal text thread
+  on your iPhone (green bubble, sent from your business number), not your
+  personal number.
+- This is a new paid vendor not in the original Section 6 list — flagging
+  per principle 5, but treating your request as approval to proceed with
+  Twilio specifically. Say so if you'd rather I hold off or use a different
+  vendor.
+- **Data model:** `threads.channel` (Section 7) extends to `email | sms |
+  dm | intake`. `messages.direction` and the reply-option/approval flow
+  (Section 4.3) are channel-agnostic already — an SMS thread gets the same
+  triage card and option-set treatment as email, just shorter drafts and a
+  `SMSProvider` adapter (mirroring `EmailProvider`) for send/receive.
+- **Sequencing:** promoted to ship alongside Gmail in **Phase 1** (not
+  deferred like Instagram) since it's core to "know what's an email vs a
+  text, respond either way" being in the app from the start.
+
+This doesn't change Phase 0 scope — Phase 0 is channel-agnostic foundation
+(auth, data models, policy engine, LLM provider). SMS ingestion/sending
+lands when Phase 1 is scoped in detail.
+
+---
+
 ## Next Step
 
 Waiting for your review of the decisions and answers to the open questions

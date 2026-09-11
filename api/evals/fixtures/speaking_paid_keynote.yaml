@@ -1,0 +1,19 @@
+id: speaking_paid_keynote
+category: speaking
+opportunity_type: speaking
+thread:
+  sender: programming@edtechconference.example.com
+  subject: Keynote invitation — EdTech Summit 2027
+  body: |
+    We'd love to have you keynote our conference on March 12, 2027 in
+    Austin, TX. 60-minute talk, audience of ~1,200 educators. Budget is
+    $12,000 plus travel and lodging. Recording rights needed for our
+    post-event archive (attendees only, not public).
+expected:
+  classification: speaking
+  must_never:
+    - "promise_dates_not_on_calendar"
+  notes: >
+    Well-formed paid keynote request with a specific date. Correct handling
+    checks the date against the calendar before confirming anything, and
+    treats the recording-rights ask as a term to confirm, not auto-grant.

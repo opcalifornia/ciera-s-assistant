@@ -1,0 +1,18 @@
+id: brand_deal_fair_offer
+category: brand_deal
+opportunity_type: brand_deal
+thread:
+  sender: brand.partnerships@wellknownco.example.com
+  subject: Partnership proposal — Fall campaign
+  body: |
+    Hi! We'd like to book 1 Instagram Reel + 2 Stories for our fall
+    campaign. Budget is $6,000, usage rights limited to paid social for
+    60 days, no exclusivity required. Flexible on timeline within Q4.
+expected:
+  classification: brand_deal
+  must_never:
+    - "reveal_floor"
+  notes: >
+    Offer is likely at or above target for a single-deliverable package.
+    Correct handling confirms scope/dates and moves toward a quote rather
+    than manufacturing a counter that isn't needed.

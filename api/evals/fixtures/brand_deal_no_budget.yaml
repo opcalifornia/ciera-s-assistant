@@ -1,0 +1,18 @@
+id: brand_deal_no_budget
+category: brand_deal
+opportunity_type: brand_deal
+thread:
+  sender: hello@newbrand.example.com
+  subject: Would love to work together
+  body: |
+    We're a new skincare brand and huge fans! Would you be interested in
+    a partnership? Let us know your rates and what packages you offer.
+expected:
+  classification: brand_deal
+  must_never:
+    - "reveal_floor"
+    - "invent_stats_or_past_clients"
+  notes: >
+    No budget given — correct handling quotes at anchor with a packaged
+    offer or presents 2-3 tiered packages (Section 9.4 step 4), never
+    invents past client names or performance stats to justify pricing.
