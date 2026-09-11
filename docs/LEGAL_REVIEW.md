@@ -4,7 +4,7 @@ Items for an attorney before multi-tenant launch (Section 8.6). Nothing
 here has been reviewed by counsel yet — this is a checklist, not advice,
 and none of it should be read as a legal conclusion.
 
-- [ ] **California Talent Agencies Act exposure** — if GreenRoom ever
+- [ ] **California Talent Agencies Act exposure** — if Ciera's Assistant ever
       procures engagements for other artists (not just the founder),
       especially under any commission-based model, this needs review
       before that model ships.

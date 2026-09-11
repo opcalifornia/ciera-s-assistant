@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Nav from "../components/Nav";
 import { api, clearTokens, Me, WorkspaceInfo } from "../lib/api";
 
 export default function Today() {
@@ -31,25 +32,16 @@ export default function Today() {
     }
   }
 
-  function signOut() {
-    clearTokens();
-    navigate("/login");
-  }
-
   if (!me || !workspace) {
     return <div className="p-8 text-sm text-muted dark:text-muted-dark">Loading…</div>;
   }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Today</h1>
-          <p className="text-sm text-muted dark:text-muted-dark">{workspace.name}</p>
-        </div>
-        <button onClick={signOut} className="text-sm text-muted hover:text-ink dark:text-muted-dark">
-          Sign out
-        </button>
+      <Nav />
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold tracking-tight">Today</h1>
+        <p className="text-sm text-muted dark:text-muted-dark">{workspace.name}</p>
       </div>
 
       <div className="card mb-4">
@@ -60,7 +52,7 @@ export default function Today() {
       </div>
 
       <div className="card mb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">Kill switch</p>
             <p className="text-sm text-muted dark:text-muted-dark">
@@ -79,9 +71,9 @@ export default function Today() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="card text-sm text-muted dark:text-muted-dark">
-        Approvals, Inbox, Pipeline, and the rest of Section 12's screens land in Phase 1+ as
-        their owning features ship. This is the Phase 0 foundation: auth, workspace, and the
-        policy engine's kill switch, wired end-to-end.
+        Head to <span className="font-medium text-ink dark:text-ink-dark">Inbox</span> to try the
+        pipeline: simulate an inbound email or text, watch it get triaged, and pick a reply option
+        to send.
       </div>
     </div>
   );

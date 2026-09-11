@@ -1,6 +1,4 @@
-# GreenRoom
-
-> Working codename only — run a trademark search before public launch.
+# Ciera's Assistant
 
 AI front office for multi-hyphenate talent: one unified inbox across
 email and text, strategic reply options in the talent's voice, and a
@@ -45,5 +43,7 @@ docs/     SCOPES.md, LEGAL_REVIEW.md
 
 ## Status
 
-Phase 0 (foundation) is in progress — see `PLAN.md` Section 15 for the
-full phased roadmap and acceptance criteria.
+Phase 0 (foundation) and Phase 1 (Brand Brain, unified inbox, Triage +
+Brand Voice agents, reply options, approvals) are in place — see
+`CHANGELOG.md` for what shipped and `DEMO.md` for a walkthrough. See
+`PLAN.md` Section 15 for the full phased roadmap and acceptance criteria.

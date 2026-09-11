@@ -21,8 +21,9 @@ from app.models.brand import AvailabilityRules, Bios, BusinessTerms  # noqa: E40
 from app.models.brand import Brand  # noqa: E402
 from app.models.user import Role, User  # noqa: E402
 from app.models.workspace import Workspace  # noqa: E402
+from app.services.default_playbooks import install_default_playbooks  # noqa: E402
 
-DEMO_EMAIL = "demo-founder@greenroom.local"
+DEMO_EMAIL = "demo-founder@example.com"
 DEMO_PASSWORD = "demo-password-change-me"
 DEMO_WORKSPACE_NAME = "Demo Talent Co."
 DEMO_BRAND_NAME = "Jordan Rivers"
@@ -88,6 +89,12 @@ async def seed() -> None:
         print(f"Created brand: {brand.persona_name} ({brand.id})")
     else:
         print(f"Brand already exists: {brand.persona_name} ({brand.id})")
+
+    installed = await install_default_playbooks(workspace_id=str(workspace.id), brand_id=str(brand.id))
+    if installed:
+        print(f"Installed {len(installed)} default Scenario Playbooks")
+    else:
+        print("Default Scenario Playbooks already installed")
 
     client.close()
     print("\nSeed complete. Log in with:")

@@ -37,4 +37,32 @@ body {
   .card {
     @apply rounded-xl border border-black/10 p-4 dark:border-white/10;
   }
+
+  .btn-ghost {
+    @apply rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors;
+    @apply hover:bg-black/[0.03] hover:text-ink dark:text-muted-dark dark:hover:bg-white/5 dark:hover:text-ink-dark;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+  .badge-neutral {
+    @apply badge bg-black/[0.05] text-muted dark:bg-white/10 dark:text-muted-dark;
+  }
+  .badge-good {
+    @apply badge bg-accent/10 text-accent;
+  }
+  .badge-warn {
+    @apply badge bg-amber-500/10 text-amber-600 dark:text-amber-400;
+  }
+  .badge-bad {
+    @apply badge bg-red-500/10 text-red-600 dark:text-red-400;
+  }
+
+  .bubble-inbound {
+    @apply max-w-[80%] rounded-2xl rounded-tl-sm bg-black/[0.04] px-4 py-2.5 text-sm dark:bg-white/[0.06];
+  }
+  .bubble-outbound {
+    @apply max-w-[80%] rounded-2xl rounded-tr-sm bg-accent px-4 py-2.5 text-sm text-white;
+  }
 }

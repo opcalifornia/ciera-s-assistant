@@ -1,6 +1,7 @@
-# GREENROOM — Phase 0 Plan
+# Ciera's Assistant — Phase 0 Plan
 
-> Working codename only — run a trademark search before public launch.
+> Product name: **Ciera's Assistant** (built from the "GreenRoom" master
+> build prompt — GreenRoom was the working codename during planning).
 
 This document covers architecture, repo layout, decisions made where the
 master build prompt left options open, open questions for the founder, the

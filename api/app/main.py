@@ -8,7 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.core.config import get_settings
 from app.models import DOCUMENT_MODELS
-from app.routers import auth, brands, workspaces
+from app.routers import auth, brand_brain, brands, option_sets, playbooks, threads, workspaces
 
 
 @asynccontextmanager
@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="GreenRoom API", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="Ciera's Assistant API", version="0.1.0", lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,
@@ -35,6 +35,10 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(workspaces.router)
     app.include_router(brands.router)
+    app.include_router(brand_brain.router)
+    app.include_router(playbooks.router)
+    app.include_router(threads.router)
+    app.include_router(option_sets.router)
 
     @app.get("/health")
     async def health() -> dict[str, str]:

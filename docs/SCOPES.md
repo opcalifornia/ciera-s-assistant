@@ -1,6 +1,6 @@
 # OAuth & API Scopes
 
-Documents every external scope GreenRoom requests, and why (Section 6
+Documents every external scope Ciera's Assistant requests, and why (Section 6
 principle: "least-privilege API scopes; documented in docs/SCOPES.md").
 
 No integration is wired up yet — this file is a placeholder populated as

@@ -1,3 +1,4 @@
+import pytest
 import pytest_asyncio
 from beanie import init_beanie
 from httpx import ASGITransport, AsyncClient
@@ -5,6 +6,22 @@ from mongomock_motor import AsyncMongoMockClient
 
 from app.main import create_app
 from app.models import DOCUMENT_MODELS
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _init_beanie_for_document_construction():
+    """Beanie Documents need `init_beanie` called once before they can be
+    constructed at all (even without saving) — this makes plain unit
+    tests that build a `Brand`/`Workspace`/etc. in memory work without
+    every test file needing its own ASGI app + mongomock setup. Tests
+    that exercise real persistence (e.g. the auth flow) still get their
+    own isolated database via `app_client` below."""
+    import asyncio
+
+    client = AsyncMongoMockClient()
+    asyncio.run(
+        init_beanie(database=client["greenroom_test_session"], document_models=DOCUMENT_MODELS)
+    )
 
 
 @pytest_asyncio.fixture

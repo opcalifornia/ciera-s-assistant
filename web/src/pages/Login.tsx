@@ -33,7 +33,7 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">GreenRoom</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Ciera's Assistant</h1>
           <p className="mt-1 text-sm text-muted dark:text-muted-dark">
             {mode === "login" ? "Sign in to your front office" : "Set up your workspace"}
           </p>

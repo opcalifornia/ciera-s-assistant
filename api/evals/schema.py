@@ -1,37 +1,20 @@
 """Eval fixture schema (Section 13).
 
-Phase 0 ships the harness and fixture set with schema + coverage
-validation only (no agents exist yet to grade). Phase 1 extends
-`runner.py` to actually run the Triage/Brand Voice/Deal Desk agents
-against these fixtures and score classification accuracy, field
-extraction F1, and guardrail violations, per the metrics table in
-Section 13.
+Phase 0 shipped the harness and fixture set with schema + coverage
+validation only. Phase 1 wires `runner.py` to actually run the Triage
+agent against these fixtures and score classification accuracy — see
+`evals/scoring.py`. `MessageClass` is imported from `app.agents.schemas`
+so the fixtures and the real agent are validated against the exact same
+classification set.
 """
 
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
+from app.agents.schemas import MessageClass
 
-class MessageClass(StrEnum):
-    BRAND_DEAL = "brand_deal"
-    SPEAKING = "speaking"
-    SCHOOL_VISIT = "school_visit"
-    SHOW_APPEARANCE = "show_appearance"
-    MEDIA = "media"
-    PRODUCTION_GIG = "production_gig"
-    BOOK_ORDER = "book_order"
-    COLLABORATION = "collaboration"
-    OTHER = "other"
-    FAN_MAIL = "fan_mail"
-    PRESS_INQUIRY = "press_inquiry"
-    VENDOR_PITCH = "vendor_pitch"
-    SPAM = "spam"
-    SCAM_SUSPECTED = "scam_suspected"
-    PERSONAL = "personal"
-    ADMIN_BILLING = "admin_billing"
-    LEGAL = "legal"
-    SUSPICIOUS_INJECTION = "suspicious_injection"
+__all__ = ["MessageClass", "EvalCategory", "ThreadFixture", "ExpectedOutcome", "EvalFixture"]
 
 
 class EvalCategory(StrEnum):
