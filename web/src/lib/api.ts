@@ -135,6 +135,26 @@ export interface OptionSet {
   chosen_option_index: number | null;
 }
 
+export interface ConcessionRule {
+  label: string;
+  fee_adjustment_pct: number;
+  requires: string;
+}
+
+export interface Offering {
+  id: string;
+  opportunity_type: string;
+  name: string;
+  description: string;
+  inclusions: string[];
+  anchor: number | null;
+  target: number | null;
+  floor: number | null;
+  currency: string;
+  concession_ladder: ConcessionRule[];
+  is_active: boolean;
+}
+
 export const api = {
   register: (payload: { workspace_name: string; email: string; password: string; full_name?: string }) =>
     request<TokenResponse>("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
@@ -180,6 +200,23 @@ export const api = {
     ),
   adjustOption: (optionSetId: string, payload: { index: number; instruction: string }) =>
     request<{ draft: string }>(`/option-sets/${optionSetId}/adjust`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  listOfferings: (brandId: string) => request<Offering[]>(`/brands/${brandId}/offerings`),
+  createOffering: (
+    brandId: string,
+    payload: {
+      opportunity_type: string;
+      name: string;
+      anchor?: number;
+      target?: number;
+      floor?: number;
+      concession_ladder?: ConcessionRule[];
+    },
+  ) =>
+    request<Offering>(`/brands/${brandId}/offerings`, {
       method: "POST",
       body: JSON.stringify(payload),
     }),

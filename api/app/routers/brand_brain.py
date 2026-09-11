@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from app.core.security import CurrentUser
 from app.models.brand import Brand
 from app.models.brand_document import BrandDocument, BrandDocumentType
-from app.models.offering import Offering
+from app.models.offering import ConcessionRule, Offering, RateModifier
 from app.models.user import Role
 from app.providers.embeddings import get_embedding_provider
 from app.services.retrieval_service import ingest_document, most_similar
@@ -36,6 +36,8 @@ class OfferingRequest(BaseModel):
     target: float | None = None
     floor: float | None = None
     currency: str = "USD"
+    modifiers: list[RateModifier] = Field(default_factory=list)
+    concession_ladder: list[ConcessionRule] = Field(default_factory=list)
 
 
 class OfferingResponse(OfferingRequest):
@@ -54,6 +56,8 @@ def _offering_response(o: Offering) -> OfferingResponse:
         target=o.target,
         floor=o.floor,
         currency=o.currency,
+        modifiers=o.modifiers,
+        concession_ladder=o.concession_ladder,
         is_active=o.is_active,
     )
 

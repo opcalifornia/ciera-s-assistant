@@ -11,10 +11,13 @@ this function calls `evaluate()` and fills it in.
 from __future__ import annotations
 
 from app.agents.brand_voice import BrandVoiceAgent
-from app.agents.schemas import OptionSetResult, TriageResult
+from app.agents.deal_desk import negotiate
+from app.agents.schemas import NegotiationResult, OptionSetResult, TriageResult
 from app.agents.triage import TriageAgent
 from app.core.policy_engine import PolicyRequest, ToolPermissionClass, evaluate
 from app.models.brand import Brand
+from app.models.offering import Offering
+from app.models.opportunity import Opportunity
 from app.models.option_set import OptionSet, OptionSetStatus, PersistedOption, PersistedQuickReply
 from app.models.playbook import ScenarioPlaybook
 from app.models.thread import Channel, Message, MessageDirection, Thread, TriageSnapshot
@@ -130,6 +133,50 @@ def _persist_option_set(
     )
 
 
+async def _upsert_opportunity(
+    *, workspace_id: str, brand_id: str, thread_id: str, triage: TriageResult
+) -> Opportunity | None:
+    """Every opportunity-typed thread (Section 3) gets an `Opportunity`
+    record. Re-triaging the same thread (a follow-up message) merges in
+    newly extracted fields rather than overwriting what's already known
+    — the talent may have supplied a date in message 1 and a budget in
+    message 3."""
+    if triage.opportunity_type is None:
+        return None
+
+    opportunity = await Opportunity.find_one(Opportunity.thread_id == thread_id)
+    if opportunity is None:
+        opportunity = Opportunity(
+            workspace_id=workspace_id,
+            brand_id=brand_id,
+            thread_id=thread_id,
+            opportunity_type=triage.opportunity_type,
+        )
+
+    opportunity.extracted_fields = {**opportunity.extracted_fields, **triage.extracted_fields}
+    opportunity.missing_fields = triage.missing_fields
+    if triage.estimated_deal_value is not None:
+        opportunity.est_value = triage.estimated_deal_value
+    if triage.fit_score is not None:
+        opportunity.fit_score = triage.fit_score
+    opportunity.risk_flags = sorted(set(opportunity.risk_flags) | triage.flags)
+    opportunity.next_action = triage.recommended_next_action
+
+    await opportunity.save()
+    return opportunity
+
+
+async def _find_offering(
+    *, workspace_id: str, brand_id: str, opportunity_type: str
+) -> Offering | None:
+    return await Offering.find_one(
+        Offering.workspace_id == workspace_id,
+        Offering.brand_id == brand_id,
+        Offering.opportunity_type == opportunity_type,
+        Offering.is_active == True,  # noqa: E712 (Beanie query operator, not a bool comparison)
+    )
+
+
 async def ingest_inbound_message(
     *,
     workspace_id: str,
@@ -191,6 +238,22 @@ async def ingest_inbound_message(
     thread.needs_a_look = triage_result.needs_a_look
     await thread.save()
 
+    await _upsert_opportunity(
+        workspace_id=workspace_id,
+        brand_id=str(brand.id),
+        thread_id=str(thread.id),
+        triage=triage_result,
+    )
+
+    negotiation: NegotiationResult | None = None
+    if triage_result.opportunity_type is not None:
+        offering = await _find_offering(
+            workspace_id=workspace_id,
+            brand_id=str(brand.id),
+            opportunity_type=triage_result.opportunity_type,
+        )
+        negotiation = negotiate(offering=offering, triage=triage_result)
+
     playbook: ScenarioPlaybook | None = await playbook_service.find_matching_playbook(
         workspace_id=workspace_id,
         brand_id=str(brand.id),
@@ -208,6 +271,7 @@ async def ingest_inbound_message(
         body=body,
         workspace_id=workspace_id,
         playbook=playbook,
+        negotiation=negotiation,
     )
 
     option_set = _persist_option_set(

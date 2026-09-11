@@ -105,3 +105,26 @@ class OptionSetResult(BaseModel):
     options: list[ReplyOption] = Field(default_factory=list)
     quick_replies: list[QuickReply] = Field(default_factory=list)
     playbook_id: str | None = None
+
+
+class NegotiationMove(StrEnum):
+    """Section 9.4's turn algorithm outcomes. Deterministic, plain-code
+    output (Section 2 principle 2) — an LLM only phrases these, it never
+    decides the numbers."""
+
+    REQUEST_MISSING_INFO = "request_missing_info"
+    CONFIRM_SCOPE_AT_BUDGET = "confirm_scope_at_budget"
+    COUNTER_WITH_CONCESSION = "counter_with_concession"
+    QUOTE_AT_ANCHOR = "quote_at_anchor"
+    DECLINE_BELOW_FLOOR = "decline_below_floor"
+    NO_OFFERING_CONFIGURED = "no_offering_configured"
+
+
+class NegotiationResult(BaseModel):
+    move: NegotiationMove
+    quoted_amount: float | None = None
+    concession_label: str | None = None  # which ConcessionRule.label was used, if any
+    concession_requires: str | None = None  # the "get" the reply must ask for
+    missing_fields: list[str] = Field(default_factory=list)
+    rationale: str = ""  # shown to the talent — never contains the floor number
+    action: str = "message.send_reply"

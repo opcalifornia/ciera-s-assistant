@@ -2,6 +2,7 @@ from app.models.audit_log import AuditLog
 from app.models.brand import Brand
 from app.models.brand_document import BrandDocument
 from app.models.offering import Offering
+from app.models.opportunity import Opportunity
 from app.models.option_set import OptionChoice, OptionSet
 from app.models.playbook import ScenarioPlaybook
 from app.models.thread import Message, Thread
@@ -17,6 +18,7 @@ DOCUMENT_MODELS = [
     Message,
     BrandDocument,
     Offering,
+    Opportunity,
     ScenarioPlaybook,
     OptionSet,
     OptionChoice,
@@ -31,6 +33,7 @@ __all__ = [
     "Message",
     "BrandDocument",
     "Offering",
+    "Opportunity",
     "ScenarioPlaybook",
     "OptionSet",
     "OptionChoice",

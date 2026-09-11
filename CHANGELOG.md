@@ -1,5 +1,44 @@
 # Changelog
 
+## Phase 2 (partial) — Deal Desk
+
+- `Opportunity` model + pipeline stage machine (Section 9.3): the full
+  `new → ... → closed_won` happy path plus `closed_lost`/`declined_by_talent`/
+  `ghosted`/`on_hold`, with `can_transition()` enforcing legal moves and
+  `APPROVAL_GATED_STAGES` marking `verbal_yes` and beyond. Every
+  opportunity-typed thread now gets an `Opportunity` record, merging in
+  newly extracted fields as follow-up messages arrive.
+- Rate cards graduated (Section 9.1/9.2): `Offering` gained `modifiers`
+  (generic additive/multiplicative rate adjustments) and a
+  `concession_ladder` (every discount paired with a required trade).
+  `app/services/pricing_service.py` is the deterministic math — floor/
+  target comparisons, modifier application, and picking the smallest
+  sufficient concession for a given budget.
+- Deal Desk negotiation agent (`app/agents/deal_desk.py`) — deliberately
+  plain, deterministic code implementing Section 9.4's turn algorithm:
+  request missing info, confirm scope at budget, counter within the
+  concession ladder, quote at anchor, or decline below floor. A final
+  guard re-checks every quoted amount against the floor before
+  returning. The floor number itself never appears in any output.
+- This is the first agent that can produce a **real, correct, zero-cost
+  reply** without any LLM key — `draft_reply_option()` templates a
+  correct quote/counter/decline straight from the deterministic
+  decision. Brand Voice uses it to anchor the option set (always
+  recommended, numbers grounded) and, when a real LLM key exists, adds
+  additional strategically distinct options on top of the same figures.
+- New Policy Engine action ids wired to the L2 allow-list
+  (`message.request_missing_info`, `message.send_standard_quote_at_or_above_target`,
+  `message.send_counter_within_concession_ladder_above_target`) plus a
+  new `message.send_decline_below_floor` action that always requires
+  approval.
+- Frontend: a **Brand Brain** page to configure offerings (anchor/
+  target/floor + one concession rung) from the browser — no curl
+  required to try Deal Desk.
+- Guardrail tests (Section 9.5): never quotes below floor even under a
+  misconfigured rate card, never reveals the floor number, concession
+  trades always paired with a "requires", smallest-sufficient-concession
+  selection verified against multiple budget levels.
+
 ## Phase 0 — Foundation
 
 - Repo scaffolding: FastAPI backend (`api/`), React/Vite/TS frontend

@@ -1,16 +1,46 @@
-"""Offerings catalog (Section 4.1).
+"""Offerings catalog with rate cards (Section 4.1, 9.1, 9.2).
 
-Full rate cards with modifiers and a concession ladder are Section 9 /
-Phase 2 (Deal Desk). Phase 1's `Offering` carries the anchor/target/floor
-numbers directly so the Brand Brain editor and the seed data (PLAN.md
-Section 16) have somewhere to live now — Phase 2 can graduate these into
-a full `RateCard` with modifiers without changing this shape.
+Modifiers and the concession ladder live directly on `Offering` rather
+than a separate `rate_cards` collection — one offering has exactly one
+rate card in practice, so splitting them would just be an extra join for
+no real flexibility gained (graduating Phase 1's bare anchor/target/floor
+into this richer shape without changing the collection, as planned).
 """
 
-from pydantic import Field
+from enum import StrEnum
+
+from pydantic import BaseModel, Field
 from pymongo import IndexModel
 
 from app.models.base import WorkspaceScopedDocument
+
+
+class ModifierKind(StrEnum):
+    ADDITIVE = "additive"  # `amount` is a flat currency delta
+    MULTIPLICATIVE = "multiplicative"  # `amount` is a fraction, e.g. -0.15 = 15% off
+
+
+class RateModifier(BaseModel):
+    """One line of Section 9.1's modifier list — usage rights, exclusivity,
+    rush delivery, travel days, virtual/nonprofit/Title I discounts,
+    routing/bundle discounts, recording rights, etc. Generic on purpose:
+    the talent configures which modifiers exist and their amounts rather
+    than the code hardcoding each named modifier from the spec."""
+
+    key: str  # stable id referenced by name when applying, e.g. "exclusivity_per_month"
+    label: str
+    kind: ModifierKind
+    amount: float
+
+
+class ConcessionRule(BaseModel):
+    """One rung of Section 9.2's concession ladder: every price reduction
+    is paired with a get. `fee_adjustment_pct` is negative (a discount),
+    `requires` is the human-readable trade the other side must accept."""
+
+    label: str
+    fee_adjustment_pct: float
+    requires: str
 
 
 class Offering(WorkspaceScopedDocument):
@@ -23,6 +53,8 @@ class Offering(WorkspaceScopedDocument):
     target: float | None = None
     floor: float | None = None
     currency: str = "USD"
+    modifiers: list[RateModifier] = Field(default_factory=list)
+    concession_ladder: list[ConcessionRule] = Field(default_factory=list)
     is_active: bool = True
 
     class Settings:

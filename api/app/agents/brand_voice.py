@@ -20,7 +20,16 @@ import re
 
 from pydantic import ValidationError
 
-from app.agents.schemas import MessageClass, OptionSetResult, QuickReply, ReplyOption, TriageResult
+from app.agents.deal_desk import draft_reply_option
+from app.agents.schemas import (
+    MessageClass,
+    NegotiationMove,
+    NegotiationResult,
+    OptionSetResult,
+    QuickReply,
+    ReplyOption,
+    TriageResult,
+)
 from app.core.models_config import ModelTier
 from app.models.brand import Brand
 from app.models.playbook import ScenarioPlaybook
@@ -67,14 +76,37 @@ Produce 2 to 4 options total{fixed_option_note}.
 """
 
 
-def _build_system_prompt(brand: Brand, playbook: ScenarioPlaybook | None) -> str:
-    playbook_context = ""
+def _negotiation_context(negotiation: NegotiationResult | None) -> str:
+    if negotiation is None or negotiation.move == NegotiationMove.NO_OFFERING_CONFIGURED:
+        return ""
+    lines = [
+        "\nThe Deal Desk has already computed the numbers for this reply — use these EXACT "
+        "figures in every option that quotes a price. Never invent a different number, and "
+        "never state or imply a floor/walk-away price.",
+        f"Decision: {negotiation.move.value}",
+    ]
+    if negotiation.quoted_amount is not None:
+        lines.append(f"Amount to quote: ${negotiation.quoted_amount:,.0f}")
+    if negotiation.concession_requires:
+        lines.append(
+            f"If offering this price, it must be paired with this trade: "
+            f"{negotiation.concession_requires}"
+        )
+    if negotiation.missing_fields:
+        lines.append(f"Missing info to ask for: {', '.join(negotiation.missing_fields)}")
+    return "\n".join(lines) + "\n"
+
+
+def _build_system_prompt(
+    brand: Brand, playbook: ScenarioPlaybook | None, negotiation: NegotiationResult | None = None
+) -> str:
+    playbook_context = _negotiation_context(negotiation)
     fixed_option_note = ""
     if playbook is not None:
         fixed_labels = "; ".join(
             f'"{opt.label}" ({opt.strategy})' for opt in playbook.fixed_options
         )
-        playbook_context = (
+        playbook_context += (
             f'\nA Scenario Playbook matched this message: "{playbook.name}". '
             f"You MUST include an option for each of these fixed moves: {fixed_labels}. "
         )
@@ -154,6 +186,7 @@ class BrandVoiceAgent:
         body: str,
         workspace_id: str,
         playbook: ScenarioPlaybook | None = None,
+        negotiation: NegotiationResult | None = None,
     ) -> OptionSetResult:
         if triage.classification in _NEEDS_YOUR_CALL_CLASSES:
             return _needs_your_call()
@@ -170,15 +203,46 @@ class BrandVoiceAgent:
                 ]
             )
 
+        # Deal Desk already computed the exact numbers for opportunity-typed
+        # threads with a configured rate card — that deterministic option is
+        # always correct and free, so it anchors the set regardless of LLM
+        # availability. The LLM, when available, only adds ADDITIONAL
+        # strategically distinct options grounded on the same figures.
+        grounded_option = (
+            draft_reply_option(negotiation, brand)
+            if negotiation is not None
+            and negotiation.move != NegotiationMove.NO_OFFERING_CONFIGURED
+            else None
+        )
+
         response = await self._llm.complete(
-            system=_build_system_prompt(brand, playbook),
+            system=_build_system_prompt(brand, playbook, negotiation),
             messages=[{"role": "user", "content": f"From: {sender}\nSubject: {subject}\n\n{body}"}],
             tier=ModelTier.BALANCED,
             workspace_id=workspace_id,
         )
 
-        options = _parse_options(response.text)
-        if options is None:
+        llm_options = _parse_options(response.text)
+
+        if llm_options is None:
+            if grounded_option is not None:
+                return OptionSetResult(
+                    options=[grounded_option], playbook_id=str(playbook.id) if playbook else None
+                )
             return _fallback_quick_reply()
 
-        return OptionSetResult(options=options, playbook_id=str(playbook.id) if playbook else None)
+        if grounded_option is not None:
+            # The grounded option is the source of truth for numbers/action;
+            # keep it recommended, demote any LLM options that duplicate its
+            # label, and cap the total at 4 (Section 4.3.1).
+            for opt in llm_options:
+                opt.is_recommended = False
+            extra = [o for o in llm_options if o.label != grounded_option.label][:3]
+            combined = [grounded_option, *extra]
+            return OptionSetResult(
+                options=combined, playbook_id=str(playbook.id) if playbook else None
+            )
+
+        return OptionSetResult(
+            options=llm_options, playbook_id=str(playbook.id) if playbook else None
+        )

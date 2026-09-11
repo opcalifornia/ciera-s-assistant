@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { getAccessToken } from "./lib/api";
+import BrandBrain from "./pages/BrandBrain";
 import Inbox from "./pages/Inbox";
 import Login from "./pages/Login";
 import Today from "./pages/Today";
@@ -27,6 +28,14 @@ export default function App() {
         element={
           <RequireAuth>
             <Inbox />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/brand-brain"
+        element={
+          <RequireAuth>
+            <BrandBrain />
           </RequireAuth>
         }
       />

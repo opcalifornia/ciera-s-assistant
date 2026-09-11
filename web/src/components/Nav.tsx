@@ -4,6 +4,7 @@ import { clearTokens } from "../lib/api";
 const links = [
   { to: "/today", label: "Today" },
   { to: "/inbox", label: "Inbox" },
+  { to: "/brand-brain", label: "Brand Brain" },
 ];
 
 export default function Nav() {
