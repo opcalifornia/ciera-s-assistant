@@ -11,8 +11,15 @@ this function calls `evaluate()` and fills it in.
 from __future__ import annotations
 
 from app.agents.brand_voice import BrandVoiceAgent
+from app.agents.bulk_desk import parse_quantity, quote_bulk
 from app.agents.deal_desk import negotiate
-from app.agents.schemas import NegotiationResult, OptionSetResult, TriageResult
+from app.agents.schemas import (
+    BulkQuoteResult,
+    MessageClass,
+    NegotiationResult,
+    OptionSetResult,
+    TriageResult,
+)
 from app.agents.triage import TriageAgent
 from app.core.policy_engine import PolicyRequest, ToolPermissionClass, evaluate
 from app.models.brand import Brand
@@ -246,7 +253,13 @@ async def ingest_inbound_message(
     )
 
     negotiation: NegotiationResult | None = None
-    if triage_result.opportunity_type is not None:
+    bulk: BulkQuoteResult | None = None
+    if triage_result.classification == MessageClass.BOOK_ORDER:
+        offering = await _find_offering(
+            workspace_id=workspace_id, brand_id=str(brand.id), opportunity_type="book_order"
+        )
+        bulk = quote_bulk(offering=offering, quantity=parse_quantity(body))
+    elif triage_result.opportunity_type is not None:
         offering = await _find_offering(
             workspace_id=workspace_id,
             brand_id=str(brand.id),
@@ -272,6 +285,7 @@ async def ingest_inbound_message(
         workspace_id=workspace_id,
         playbook=playbook,
         negotiation=negotiation,
+        bulk=bulk,
     )
 
     option_set = _persist_option_set(

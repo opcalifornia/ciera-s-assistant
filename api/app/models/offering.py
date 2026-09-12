@@ -43,6 +43,18 @@ class ConcessionRule(BaseModel):
     requires: str
 
 
+class BulkTier(BaseModel):
+    """One rung of Section 9.1's bulk pricing model (`book_order`):
+    quantity-based, not negotiation-based — there's no floor/target/
+    anchor haggling, just 'buy more, pay less per unit'. `min_qty` is
+    the smallest quantity this tier's `unit_price` applies to; tiers are
+    matched by the highest `min_qty` at or below the requested quantity."""
+
+    min_qty: int
+    unit_price: float
+    label: str = ""
+
+
 class Offering(WorkspaceScopedDocument):
     brand_id: str
     opportunity_type: str  # Section 3 opportunity type id, e.g. "school_visit"
@@ -55,6 +67,7 @@ class Offering(WorkspaceScopedDocument):
     currency: str = "USD"
     modifiers: list[RateModifier] = Field(default_factory=list)
     concession_ladder: list[ConcessionRule] = Field(default_factory=list)
+    bulk_tiers: list[BulkTier] = Field(default_factory=list)
     is_active: bool = True
 
     class Settings:

@@ -128,3 +128,22 @@ class NegotiationResult(BaseModel):
     missing_fields: list[str] = Field(default_factory=list)
     rationale: str = ""  # shown to the talent — never contains the floor number
     action: str = "message.send_reply"
+
+
+class BulkMove(StrEnum):
+    """Section 9.1's bulk pricing outcomes (`book_order`) — quantity-based,
+    no negotiation ladder involved."""
+
+    REQUEST_QUANTITY = "request_quantity"
+    QUOTE_BULK = "quote_bulk"
+    NO_TIERS_CONFIGURED = "no_tiers_configured"
+
+
+class BulkQuoteResult(BaseModel):
+    move: BulkMove
+    quantity: int | None = None
+    unit_price: float | None = None
+    total_amount: float | None = None
+    tier_label: str = ""
+    rationale: str = ""
+    action: str = "message.send_reply"
